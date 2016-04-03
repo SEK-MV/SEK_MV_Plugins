@@ -13,9 +13,9 @@ Game_Party.prototype.maxBattleMembers = function() {
 
 var dead=0;
 var aliasdead =Game_Unit.prototype.isAllDead;
-Game_Unit.prototype.isAllDead = function() {
-	aliasdead.call(this);
-	var tot=$gameParty.allMembers().length;
+
+Game_Party.prototype.isAllDead = function() {
+    var tot=$gameParty.allMembers().length;
 	var p
 	dead=0
 	for (p=0; p<tot; p++)
@@ -23,7 +23,7 @@ Game_Unit.prototype.isAllDead = function() {
 	if (dead>tot-1) 
 	{
 	dead=0;
-	return true;
+	return this.inBattle() || !this.isEmpty();
 	}
 	if ($gameParty.allMembers()[0].isDead())
 	{
