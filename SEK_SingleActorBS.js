@@ -12,8 +12,6 @@ Game_Party.prototype.maxBattleMembers = function() {
 };
 
 var dead=0;
-var aliasdead =Game_Unit.prototype.isAllDead;
-
 Game_Party.prototype.isAllDead = function() {
     var tot=$gameParty.allMembers().length;
 	var p
