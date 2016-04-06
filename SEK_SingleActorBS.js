@@ -14,8 +14,8 @@ Game_Party.prototype.maxBattleMembers = function() {
 var dead=0;
 Game_Party.prototype.isAllDead = function() {
     var tot=$gameParty.allMembers().length;
-	var p
-	dead=0
+	var p;
+	dead=0;
 	for (p=0; p<tot; p++)
 	if ($gameParty.allMembers()[p].hp==0) dead++;
 	if (dead>tot-1) 
