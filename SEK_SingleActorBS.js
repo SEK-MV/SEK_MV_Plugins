@@ -7,6 +7,10 @@
 * @author SEK
 */
 
+/*
+This is my first plugin. even if I try my best, I might not be able to help with issues.
+You are free to use it. If you do use it, I'd like to have my name and my plugin's name included in credits.
+*/
 Game_Party.prototype.maxBattleMembers = function() {
     return 1;
 };
