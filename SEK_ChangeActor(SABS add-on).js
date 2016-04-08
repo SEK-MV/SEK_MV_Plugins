@@ -13,6 +13,9 @@
 *
 */
 //NOTE: It may cause problems if used without SABS!
+/*
+You are free to use this plugin. If you do use it, I'd like to have my name and my plugin's name included in credits.
+*/
 var params=PluginManager.parameters('SEK_ChangeActor(SABS add-on)');
 var cambio=String(params['Command Name']||"Change");
 
