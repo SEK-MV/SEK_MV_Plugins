@@ -35,8 +35,8 @@
 * Plugin Commands:
 *
 * Box Open - Opens the box.
-* Box Add [x] - Add member x to your box.
-* Box Remove [x] - Remove member x from your box.
+* Box Add x - Add member x to your box.
+* Box Remove x - Remove member x from your box.
 * Box On - Enables the box command in your menu.
 * Box Off - Disables the box command in your menu.
 * Box MenuOn - Box command will show up in your menu.
