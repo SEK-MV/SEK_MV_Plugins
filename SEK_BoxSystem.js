@@ -442,7 +442,7 @@
 	    rect.width = this.itemWidth();
 	    rect.height = this.itemHeight();
 	    rect.x = index % maxCols * 136;
-	    rect.y = Math.floor(index / maxCols) * 136 - this._scrollY;
+	    rect.y = Math.floor(index / maxCols) * 110 - this._scrollY;
 	    return rect;
 	};
 	
@@ -540,7 +540,7 @@
 	    rect.width = this.itemWidth();
 	    rect.height = this.itemHeight();
 	    rect.x = (index%maxCols *136);
-	    rect.y = Math.floor(index / maxCols) * 136 - this._scrollY;
+	    rect.y = Math.floor(index / maxCols) * 110 - this._scrollY;
 	    return rect;
 	};
 
