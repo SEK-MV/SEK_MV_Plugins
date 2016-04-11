@@ -14,6 +14,10 @@
 * @desc General formula for new weapon's bonus damage. If 0, no bonus will be added. Default is "ac*lv".
 * @default ac*lv
 *
+* @param Draw Skill Counter in menu
+* @desc Set this true to draw Skill Counter in menu. Default is true.
+* @default true
+*
 * @help 
 *
 * You can also manage the number of uses.
@@ -22,6 +26,9 @@
 *
 * Plugin Commands:
 * 
+* AttackCount showsc
+* If Draw Skill Counter in menu is true, sets it false, otherwise sets it true.
+*
 * AttackCount set x y z
 * Sets the counter of a skill from an actor to a specific number.
 * x = actorId
@@ -81,13 +88,18 @@
 	var params=PluginManager.parameters('SEK_BoxSystem');
 	var Formula = String(params['Skill General Formula'] || "ac*lv");
 	var wFormula = String(params['Weapon General Formula'] || "ac*lv");
-	
+	var showsc = (params['Draw Skill Counter in menu']||"true").toLowerCase()==="true";
 	var aliasgamin = Game_Interpreter.prototype.pluginCommand;
 	Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		aliasgamin.call(this, command, args);
 		if (command.toLowerCase() === "attackcount") {
 			switch (args[0].toLowerCase())
-			{			
+			{		
+				case 'showsc':
+				{
+					if (showsc) showsc=false;
+					else showsc=true;
+				} break;			
 				case 'set':
 				{
 					var num=0;
@@ -146,6 +158,32 @@
 		}
 	};
 	
+	Window_SkillList.prototype.drawSkillCounter = function(skill, x, y, width) {
+            this.drawText(this._actor._SkillCounter[skill.id], x, y, width, 'right');
+    }
+	
+
+Window_SkillList.prototype.drawItem = function(index) {
+    var skill = this._data[index];
+    if (skill) {
+        var costWidth = this.costWidth();
+		var counterWidth = this.counterWidth(skill.id);
+        var rect = this.itemRect(index);
+        rect.width -= this.textPadding();
+        this.changePaintOpacity(this.isEnabled(skill));
+		if (showsc) 
+        {this.drawItemName(skill, rect.x, rect.y, rect.width - costWidth-counterWidth);
+		this.drawSkillCounter(skill, rect.x, rect.y, rect.width - costWidth);}
+		else
+		this.drawItemName(skill, rect.x, rect.y, rect.width - costWidth);
+        this.drawSkillCost(skill, rect.x, rect.y, rect.width);
+        this.changePaintOpacity(1);
+    }
+};
+
+Window_SkillList.prototype.counterWidth = function(skillId) {
+    return this.textWidth(this._actor._SkillCounter[skillId]);
+};
 		
 	Game_Action.prototype.evalDamageFormula = function(target) {
 		try {
