@@ -5,7 +5,8 @@
 /*:
 * @plugindesc Counts uses of skills and attacks and adds a bonus damage formula.
 * @author SEK
-* 
+*
+*
 * @param Skill General Formula
 * @desc General formula for new skill's bonus damage. If 0, no bonus will be added. Default is "ac*lv".
 * @default ac*lv
@@ -17,6 +18,18 @@
 * @param Draw Skill Counter in menu
 * @desc Set this true to draw Skill Counter in menu. Default is true.
 * @default true
+*
+* @param Menu Counter Color
+* @desc Skill Counter's color. Use message colors. Default is 6.
+* @default 6
+*
+* @param Skill Counter Menu Text
+* @desc Skill Counter's Text in menu. Write "null" to hide it. Default is "Counter:".
+* @default Counter:
+*
+* @param Font Size
+* @desc Skill Counter's Font Size in menu. Default is 20.
+* @default 20
 *
 * @help 
 *
@@ -85,10 +98,13 @@
 */
 
 (function() {
-	var params=PluginManager.parameters('SEK_BoxSystem');
+	var params=PluginManager.parameters('SEK_AttackCountAndFormula');
 	var Formula = String(params['Skill General Formula'] || "ac*lv");
 	var wFormula = String(params['Weapon General Formula'] || "ac*lv");
-	var showsc = (params['Draw Skill Counter in menu']||"true").toLowerCase()==="true";
+	var showsc = (params['Draw Skill Counter in menu'] || "true").toLowerCase()==="true";
+	var colore = Number(params['Menu Counter Color'] || 6);
+	var scText = String(params['Skill Counter Menu Text'] || "Counter:");
+	var fSize = Number(params['Font Size'] || 20);
 	var aliasgamin = Game_Interpreter.prototype.pluginCommand;
 	Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		aliasgamin.call(this, command, args);
@@ -157,12 +173,28 @@
 			}
 		}
 	};
-	
+	console.log(Formula);
 	Window_SkillList.prototype.drawSkillCounter = function(skill, x, y, width) {
-            this.drawText(this._actor._SkillCounter[skill.id], x, y, width, 'right');
+			var Testo=this._actor._SkillCounter[skill.id];
+			if (scText!="null") Testo=scText+Testo;
+			this.contents.fontSize=fSize;
+			this.changeTextColor(this.textColor(colore));
+            this.drawText(Testo, x, y, width-4, 'right');
+			this.contents.fontSize=this.standardFontSize();
     }
 	
+Window_SkillList.prototype.drawSkillCost = function(skill, x, y, width) {
+    if (this._actor.skillTpCost(skill) > 0) {
+        this.changeTextColor(this.tpCostColor());
+        this.drawText(this._actor.skillTpCost(skill), x, y, width, 'right');
+    } else if (this._actor.skillMpCost(skill) > 0) {
+        this.changeTextColor(this.mpCostColor());
+        this.drawText(this._actor.skillMpCost(skill), x, y, width, 'right');
+    }
+	return ret-this.costWidth();
+};
 
+var ret
 Window_SkillList.prototype.drawItem = function(index) {
     var skill = this._data[index];
     if (skill) {
@@ -170,16 +202,17 @@ Window_SkillList.prototype.drawItem = function(index) {
 		var counterWidth = this.counterWidth(skill.id);
         var rect = this.itemRect(index);
         rect.width -= this.textPadding();
+		ret = rect.width;
         this.changePaintOpacity(this.isEnabled(skill));
-		if (showsc) 
-        {this.drawItemName(skill, rect.x, rect.y, rect.width - costWidth-counterWidth);
-		this.drawSkillCounter(skill, rect.x, rect.y, rect.width - costWidth);}
-		else
-		this.drawItemName(skill, rect.x, rect.y, rect.width - costWidth);
-        this.drawSkillCost(skill, rect.x, rect.y, rect.width);
+		 var space= this.textWidth(skill.name);
+        this.drawItemName(skill, rect.x, rect.y, rect.width - costWidth-counterWidth);
+		var dw = this.drawSkillCost(skill, rect.x, rect.y, rect.width);
+		if (showsc)
+		{
+		this.drawSkillCounter(skill, rect.x, rect.y, dw);
+		}
         this.changePaintOpacity(1);
-    }
-};
+    }};
 
 Window_SkillList.prototype.counterWidth = function(skillId) {
     return this.textWidth(this._actor._SkillCounter[skillId]);
