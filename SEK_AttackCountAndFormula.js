@@ -358,8 +358,8 @@ Window_SkillList.prototype.counterWidth = function(skillId) {
 	    this._WeaponCounter = {};
 		this._WeaponDmgBonus = {};
 		this._WCLimit = {};
-		this._skillLearn = {};
-		this._weaponLearn = {};
+		this._skillLearn = [];
+		this._weaponLearn = [];
 	};
 
 	var aliasnewskill = Game_Actor.prototype.learnSkill;
@@ -374,44 +374,61 @@ Window_SkillList.prototype.counterWidth = function(skillId) {
 	};
 	
 	Game_Actor.prototype.skillPrerequisito = function(skillId, count, learnId, forget)
-	{
-		this._skillLearn[skillId]=[count, learnId, forget];
+	{	if (!this._skillLearn[skillId]) this._skillLearn[skillId]={};
+		var pos=0;
+		while (this._skillLearn[skillId][pos]!=null) pos++;
+		this._skillLearn[skillId][pos]=[count, learnId, forget];
 	};
 	
 	Game_Actor.prototype.weaponPrerequisito = function(weaponId, count, learnId)
-	{
-		this._weaponLearn[weaponId]=[count, learnId];
+	{	if (!this._weaponLearn[weaponId]) this._weaponLearn[weaponId]={};
+		var pos=0;
+		while (this._weaponLearn[weaponId][pos]) pos++;
+		this._weaponLearn[weaponId][pos]=[count, learnId];
 	};
 	
 	Game_Actor.prototype.skillCheckLearn = function(skillId)
+	{if (this._skillLearn[skillId])
 	{
-		if (this._skillLearn[skillId]&&this._SkillCounter[skillId]>=this._skillLearn[skillId][0])
+	var k;
+	for (k in this._skillLearn[skillId])
+	{
+		if (this._skillLearn[skillId][k]&&this._SkillCounter[skillId]>=this._skillLearn[skillId][k][0])
 			{
 			var lastSkills = this.skills();
-			this.learnSkill(this._skillLearn[skillId][1])
-			if (this._skillLearn[skillId][2]>0) this.forgetSkill(skillId);
-			this._skillLearn[skillId]=null;
+			this.learnSkill(this._skillLearn[skillId][k][1])
+			if (this._skillLearn[skillId][k][2]>0) this.forgetSkill(skillId);
+			this._skillLearn[skillId][k]=null;
 			if(showlearn){
 			var newSkills = this.findNewSkills(lastSkills); 
 			newSkills.forEach(function(skill) {
 				$gameMessage.add(TextManager.obtainSkill.format(skill.name));
 			});}
+			}
+			}
 			}
 	};
 	
 	Game_Actor.prototype.weaponCheckLearn = function(weaponId)
 	{
-		if (this._weaponLearn[weaponId]&&this._WeaponCounter[weaponId]>=this._weaponLearn[weaponId][0])
+	if (this._weaponLearn[weaponId])
+	{
+	var k;
+	for (k in this._weaponLearn[weaponId])
+	{
+		if (this._weaponLearn[weaponId][k]&&this._WeaponCounter[weaponId]>=this._weaponLearn[weaponId][k][0])
 			{
 			var lastSkills = this.skills();
-			this.learnSkill(this._weaponLearn[weaponId][1])
-			this._weaponLearn[weaponId]=null;
+			this.learnSkill(this._weaponLearn[weaponId][k][1])
+			this._weaponLearn[weaponId][k]=null;
 			if(showlearn){
 			var newSkills = this.findNewSkills(lastSkills); 
 			newSkills.forEach(function(skill) {
 				$gameMessage.add(TextManager.obtainSkill.format(skill.name));
 			});}
 			}
+			k++;
+			} }
 	};
 	
 	Game_Actor.prototype.AttackCountPlus = function(skill) {
