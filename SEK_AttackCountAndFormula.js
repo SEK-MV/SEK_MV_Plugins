@@ -31,6 +31,10 @@
 * @desc Skill Counter's Font Size in menu. Default is 20.
 * @default 20
 *
+* @param Show Message when a skill is learned
+* @desc Default is true.
+* @default true
+*
 * @help 
 *
 * You can also manage the number of uses.
@@ -93,6 +97,13 @@
 * y = skillId
 * z = Attack Counter Limit
 *
+* AttackCount learn actorId skillToUse x skillToLearn forgetPreviousSkill
+* You'll learn a new skill after x uses of a skill. 
+* If the last parameter is >0, You'll forget the previous skill.
+*
+* AttackCount wlearn actorId weaponToUse x skillToLearn
+* You'll learn a new skill after x uses of a weapon.
+*
 * Plugin Commands are the same for weapons: just add "w" before the command.
 * Example: AttackCount wlimit x y z
 */
@@ -105,6 +116,7 @@
 	var colore = Number(params['Menu Counter Color'] || 6);
 	var scText = String(params['Skill Counter Menu Text'] || "Counter:");
 	var fSize = Number(params['Font Size'] || 20);
+	var showlearn = (params['Show Message when a skill is learned'] || "true").toLowerCase()==="true";
 	var aliasgamin = Game_Interpreter.prototype.pluginCommand;
 	Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		aliasgamin.call(this, command, args);
@@ -170,10 +182,21 @@
 				{
 					wFormula = String(args[1]);
 				} break;
+				
+				case 'learn':
+				{
+					this.setPrerequisito(Number(args[1]), Number(args[2]), Number(args[3]), Number(args[4]), Number(args[5]));
+				} break;
+				
+				case 'wlearn':
+				{
+					this.wsetPrerequisito(Number(args[1]), Number(args[2]), Number(args[3]), Number(args[4]));
+				} break;
 			}
 		}
 	};
-	console.log(Formula);
+	
+	
 	Window_SkillList.prototype.drawSkillCounter = function(skill, x, y, width) {
 			var Testo=this._actor._SkillCounter[skill.id];
 			if (scText!="null") Testo=scText+Testo;
@@ -226,7 +249,23 @@ Window_SkillList.prototype.counterWidth = function(skillId) {
 			var b = target;
 			var v = $gameVariables._data;
 			var sign = ([3, 4].contains(item.damage.type) ? -1 : 1);
-			if (((type)&&(a.isActor()))&&(a._SkillDmgBonus[this._item._itemId]!=null))
+			if (this.isAttack()&&(a.isActor())&&(a.weapons().length!=0))
+			{
+				var idArma;
+				if (a.weapons()[0]){idArma = a.weapons()[0].id;}
+				a._WeaponCounter[idArma]?a._WeaponCounter[idArma]++:a._WeaponCounter[idArma]=1;
+				a.weaponCheckLearn(idArma);
+				var bonus;
+				if (!((a._WeaponDmgBonus[idArma]))) bonus=wFormula;
+				else bonus=a._WeaponDmgBonus[idArma];
+				bonus=bonus.toLowerCase().replace(new RegExp("gf", 'g') , (""+wFormula)).replace(new RegExp("lv", 'g') , (""+a.level));
+				if ((!(a._WCLimit[idArma]))||(a._WCLimit[idArma]<0)||(a._WeaponCounter[idArma]<a._WCLimit[idArma]))
+				{
+					return (Math.max(eval(item.damage.formula), 0)+eval((bonus).replace(new RegExp("ac", 'g') , (""+a._WeaponCounter[idArma])))) * sign;
+				}
+					return (Math.max(eval(item.damage.formula), 0)+eval((bonus).replace(new RegExp("ac", 'g') , (""+a._WCLimit[idArma])))) * sign;
+				}
+				else if (((type)&&(a.isActor()))&&(a._SkillDmgBonus[this._item._itemId]!=null))
 			{
 			var bonus=((a._SkillDmgBonus[this._item._itemId]).toLowerCase()).replace(new RegExp("gf", 'g') , (""+Formula)).replace(new RegExp("lv", 'g') , (""+a._level));
 			if ((Number(a._SCLimit[this._item._itemId])<0)||(Number(a._SkillCounter[this._item._itemId])<=Number(a._SCLimit[this._item._itemId])))
@@ -236,33 +275,25 @@ Window_SkillList.prototype.counterWidth = function(skillId) {
 				return (Math.max(eval(item.damage.formula), 0)+eval((bonus).replace(new RegExp("ac", 'g') , (""+a._SCLimit[this._item._itemId])))) * sign;
 			
 			}
-			if (this.isAttack()&&(a.isActor())&&(a.weapons().length!=0))
-			{
-			var armi=0;
-			var idArmi=[];
-				if (a.weapons()[0]){idArmi[0]= a.weapons()[0].id; armi++;}
-				if (a.weapons()[1]){idArmi[1]= a.weapons()[1].id; armi++;}
-				
-				for (arma=0;arma<armi;arma++)
-				{
-					a._WeaponCounter[idArmi[arma]]?a._WeaponCounter[idArmi[arma]]++:a._WeaponCounter[idArmi[arma]]=1;
-				}
-				var bonus;
-				if (!((a._WeaponDmgBonus[idArmi[0]]))) bonus=wFormula;
-				else bonus=a._WeaponDmgBonus[idArmi[0]];
-				bonus=bonus.toLowerCase().replace(new RegExp("gf", 'g') , (""+wFormula)).replace(new RegExp("lv", 'g') , (""+a.level));
-				if ((!(a._WCLimit[idArmi[0]]))||(a._WCLimit[idArmi[0]]<0)||(a._WeaponCounter[idArmi[0]]<a._WCLimit[idArmi[0]]))
-				{
-					return (Math.max(eval(item.damage.formula), 0)+eval((bonus).replace(new RegExp("ac", 'g') , (""+a._WeaponCounter[idArmi[0]])))) * sign;
-				}
-					return (Math.max(eval(item.damage.formula), 0)+eval((bonus).replace(new RegExp("ac", 'g') , (""+a._WCLimit[idArmi[0]])))) * sign;
-				}
+			
 				return Math.max(eval(item.damage.formula), 0) * sign;
 				
 			} catch (e) {
 			return 0;
 		}
 	};
+	
+	Game_Interpreter.prototype.setPrerequisito = function(actorId, skillId, count, learn, forget){
+	$gameActors.actor(actorId).skillPrerequisito(skillId, count, learn, forget);
+	}
+	
+	Game_Interpreter.prototype.wsetPrerequisito = function(actorId, weaponId, count, learn){
+	$gameActors.actor(actorId).weaponPrerequisito(weaponId, count, learn);
+	}
+	
+	Game_Interpreter.prototype.setLimit = function(actorId, skillId, limit){
+	$gameActors.actor(actorId)._SCLimit[skillId]=limit;
+	}
 	
 	Game_Interpreter.prototype.setLimit = function(actorId, skillId, limit){
 	$gameActors.actor(actorId)._SCLimit[skillId]=limit;
@@ -274,11 +305,13 @@ Window_SkillList.prototype.counterWidth = function(skillId) {
 	
 	Game_Interpreter.prototype.setUses = function(actorId, skillId, count){
 		$gameActors.actor(actorId)._SkillCounter[skillId] = count;
+		$gameActors.actor(actorId).skillCheckLearn(skillId);
 	};
 	
 	Game_Interpreter.prototype.addUses = function(actorId, skillId, add){
 		if ($gameActors.actor(actorId)._SkillCounter[skillId]) add+=$gameActors.actor(actorId)._SkillCounter[skillId];
 		$gameActors.actor(actorId)._SkillCounter[skillId] = add;
+		$gameActors.actor(actorId).skillCheckLearn(skillId);
 	};
 	
 	Game_Interpreter.prototype.getUses = function(actorId, skillId, variableId){
@@ -291,19 +324,21 @@ Window_SkillList.prototype.counterWidth = function(skillId) {
 	
 	Game_Interpreter.prototype.wsetLimit = function(actorId, WeaponId, limit){
 	$gameActors.actor(actorId)._WCLimit[WeaponId]=limit;
-	}
+	};
 	
 	Game_Interpreter.prototype.wsetFormula = function(actorId, WeaponId, bonus){
 		$gameActors.actor(actorId)._WeaponDmgBonus[WeaponId]=bonus;
-	}
+	};
 	
 	Game_Interpreter.prototype.wsetUses = function(actorId, WeaponId, count){
 		$gameActors.actor(actorId)._WeaponCounter[WeaponId] = count;
+		$gameActors.actor(actorId).weaponCheckLearn(WeaponId);
 	};
 	
 	Game_Interpreter.prototype.waddUses = function(actorId, WeaponId, add){
 		if ($gameActors.actor(actorId)._WeaponCounter[WeaponId]) add+=$gameActors.actor(actorId)._WeaponCounter[WeaponId];
 		$gameActors.actor(actorId)._WeaponCounter[WeaponId] = add;
+		$gameActors.actor(actorId).weaponCheckLearn(WeaponId);
 	};
 	
 	Game_Interpreter.prototype.wgetUses = function(actorId, WeaponId, variableId){
@@ -323,6 +358,8 @@ Window_SkillList.prototype.counterWidth = function(skillId) {
 	    this._WeaponCounter = {};
 		this._WeaponDmgBonus = {};
 		this._WCLimit = {};
+		this._skillLearn = {};
+		this._weaponLearn = {};
 	};
 
 	var aliasnewskill = Game_Actor.prototype.learnSkill;
@@ -335,10 +372,52 @@ Window_SkillList.prototype.counterWidth = function(skillId) {
 		}
 		aliasnewskill.call(this, skillId);
 	};
-
+	
+	Game_Actor.prototype.skillPrerequisito = function(skillId, count, learnId, forget)
+	{
+		this._skillLearn[skillId]=[count, learnId, forget];
+	};
+	
+	Game_Actor.prototype.weaponPrerequisito = function(weaponId, count, learnId)
+	{
+		this._weaponLearn[weaponId]=[count, learnId];
+	};
+	
+	Game_Actor.prototype.skillCheckLearn = function(skillId)
+	{
+		if (this._skillLearn[skillId]&&this._SkillCounter[skillId]>=this._skillLearn[skillId][0])
+			{
+			var lastSkills = this.skills();
+			this.learnSkill(this._skillLearn[skillId][1])
+			if (this._skillLearn[skillId][2]>0) this.forgetSkill(skillId);
+			this._skillLearn[skillId]=null;
+			if(showlearn){
+			var newSkills = this.findNewSkills(lastSkills); 
+			newSkills.forEach(function(skill) {
+				$gameMessage.add(TextManager.obtainSkill.format(skill.name));
+			});}
+			}
+	};
+	
+	Game_Actor.prototype.weaponCheckLearn = function(weaponId)
+	{
+		if (this._weaponLearn[weaponId]&&this._WeaponCounter[weaponId]>=this._weaponLearn[weaponId][0])
+			{
+			var lastSkills = this.skills();
+			this.learnSkill(this._weaponLearn[weaponId][1])
+			this._weaponLearn[weaponId]=null;
+			if(showlearn){
+			var newSkills = this.findNewSkills(lastSkills); 
+			newSkills.forEach(function(skill) {
+				$gameMessage.add(TextManager.obtainSkill.format(skill.name));
+			});}
+			}
+	};
+	
 	Game_Actor.prototype.AttackCountPlus = function(skill) {
 		if (!this._SkillCounter[skill.id]) this._SkillCounter[skill.id] = 0;
 		this._SkillCounter[skill.id]++;
+		this.skillCheckLearn(skill.id);
 	};
 
 	var aliasuse = Game_Actor.prototype.useItem;
