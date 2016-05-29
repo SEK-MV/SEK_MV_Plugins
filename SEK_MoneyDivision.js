@@ -26,7 +26,7 @@
 /*
 You are free to use this plugin. If you do use it, I'd like to have my name and my plugin's name included in credits.
 */
-var params=PluginManager.parameters('SEK_ChangeActor(SABS add-on)');
+var params=PluginManager.parameters('SEK_MoneyDivision');
 var Gold_Icon=Number(params['Gold Icon Id']||163);
 var Silver_Icon=Number(params['Silver Icon Id']||160);
 var Copper_Icon=Number(params['Copper Icon Id']||162);
