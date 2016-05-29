@@ -74,8 +74,7 @@ Window_Base.prototype.drawCurrencyValue = function(value, unit, x, y, width) {
 	}
 	};
 	
-	
-	Window_ShopBuy.prototype.drawItem = function(index) {
+Window_ShopBuy.prototype.drawItem = function(index) {
     var item = this._data[index];
     var rect = this.itemRect(index);
     var priceWidth = this.textWidth('00')*3+112;
