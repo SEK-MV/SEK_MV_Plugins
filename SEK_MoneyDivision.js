@@ -67,8 +67,8 @@ Window_Base.prototype.drawCurrencyValue = function(value, unit, x, y, width) {
 	this.drawIcon(Silver_Icon, x + width - spostamento -6, y,'right');
 	}
 	else
-	{if (copper==0) c="0"+copper;
-	else c=copper;
+	{
+	c=copper;
 	this.drawText(c, x, y, width - spostamento - 6, 'right');
 	this.drawIcon(Copper_Icon, x + width - spostamento -6, y,'right');
 	}
