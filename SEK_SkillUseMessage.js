@@ -20,6 +20,7 @@
 * @default and
 *
 */
+
 var params=PluginManager.parameters('SEK_SkillUseMessage');
 	var Frase = String(params['Message'] || "%s uses %a on %t!");
 	var cong = String(params['Conjunction'] || "and");
