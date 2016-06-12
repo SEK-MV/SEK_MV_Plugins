@@ -7,7 +7,7 @@
 * @author SEK
 *
 *@param Opacity
-*@desc Not fighting members opacity. Default is 150.
+*@desc Not fighting members opacity (from 0 to 255). Default is 150.
 *@default 150
 *
 */
