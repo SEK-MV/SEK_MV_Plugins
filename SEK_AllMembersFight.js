@@ -35,10 +35,13 @@ Game_Party.prototype.maxBattleMembers = function() {
 };
 
 
+var nemici=0;
+var inCampo=0;
 Window_BattleLog.prototype.performCollapse = function(target) {
     target.performCollapse();
     var alive=0;
     var next;
+    if (nemici==0) {nemici=$gameTroop.members().length; inCampo=$gameTroop.aliveMembers().length+1;}
     if (target.isActor())
     {
         for(var p=0;p<$gameParty.allMembers().length;p++)
@@ -50,8 +53,28 @@ Window_BattleLog.prototype.performCollapse = function(target) {
 	$gameParty.addActor(safe);
         if(show)
 	$gameParty.allMembers()[numMax-1].startAnimation(animation, false, 0);
-	
         }
         
     }
+    else
+    {
+        if (nemici>inCampo) 
+        {
+            console.log(nemici+ " e "+ $gameTroop.aliveMembers().length);
+            nemici--;
+            $gameTroop.members()[nemici].appear();
+            if (show) 
+                $gameTroop.members()[nemici].startAnimation(animation, true, 0);
+        }
+    }
+};
+
+
+Scene_Battle.prototype.terminate = function() {
+    Scene_Base.prototype.terminate.call(this);
+    $gameParty.onBattleEnd();
+    $gameTroop.onBattleEnd();
+    AudioManager.stopMe();
+    nemici=0;
+    inCampo=0;
 };
