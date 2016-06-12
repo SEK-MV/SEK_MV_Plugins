@@ -25,7 +25,7 @@ This is my first plugin. even if I try my best, I might not be able to help with
 You are free to use it. If you do use it, I'd like to have my name and my plugin's name included in credits.
 */
 
-var params=PluginManager.parameters('AllMembersFight');
+var params=PluginManager.parameters('SEK_AllMembersFight');
 var show=(params['Show Animation on battler change'] || "true").toLowerCase()==="true";
 var animation = Number(params['Animation Id to show'] || 42);
 var numMax=Number(params['Max Actors'] || 1);
