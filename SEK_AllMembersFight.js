@@ -40,6 +40,8 @@
 * amf showon   Shows an animation when a unit appears
 * amf showoff  Doesn't show an animation when a unit appears
 * 
+* amf show x	Sets the animation to x
+*
 * For enemy troops:
 * If you want the enemy to work like actors, you need to hide them
 * by making them appear in the middle of the fight.
@@ -105,6 +107,10 @@ var aliasgamin = Game_Interpreter.prototype.pluginCommand;
 				{
 					show=false;
 				} break;
+				case 'show':
+				{
+					animation = Number(args[1] || 42);;
+				} break;
 			}
 		}
 	};
@@ -126,12 +132,13 @@ Window_BattleLog.prototype.performCollapse = function(target) {
             if (!$gameParty.allMembers()[p].hp==0) {if(++alive==numMax) next = p;}
         if (alive>=numMax)
         {
+            
 	var safe=target.actorId();
+	if(show)
+		$gameParty.allMembers()[numMax-1].startAnimation(animation, false, 0);
 	$gameParty.removeActor(safe);
 	$gameParty.addActor(safe);
-        if(show)
-	$gameParty.allMembers()[numMax-1].startAnimation(animation, false, 0);
-        }
+		}
         
     }
     else if (eenabled)
