@@ -353,13 +353,11 @@ Game_Party.prototype.riordina = function() {
         }
     for (var k=0;k<aggiungi.length;k++)
     {
-        console.log("rimuovo "+aggiungi[k].name());
         safe=aggiungi[k].actorId();
         $gameParty.removeActor(safe);
     }
     for (var k=0;k<aggiungi.length;k++)
     {
-        console.log("reinserisco "+aggiungi[k].name());
         safe=aggiungi[k].actorId();
         $gameParty.addActor(safe);
     }
