@@ -8,7 +8,7 @@
 *
 *@param Opacity
 *@desc Not fighting members opacity (from 0 to 255). Default is 150.
-*@default 150
+*@default 1
 *
 *@param Style
 *@desc Not fighting members display style (from 1 to 4). Default is 1.
