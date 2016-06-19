@@ -127,30 +127,15 @@ Scene_Battle.prototype.onActorCancel = function() {
     }
 };
 
+var isanyinput = Scene_Battle.prototype.isAnyInputWindowActive;
 Scene_Battle.prototype.isAnyInputWindowActive = function() {
-    return (this._partyCommandWindow.active ||
-            this._actorCommandWindow.active ||
-            this._skillWindow.active ||
-            this._itemWindow.active ||
-            this._changeWindow.active ||
-            this._actorWindow.active ||
-            this._enemyWindow.active);
+    return (isanyinput.call(this)||this._changeWindow.active);
 };
 
-
+var aliascreatewindows =Scene_Battle.prototype.createAllWindows;
 Scene_Battle.prototype.createAllWindows = function() {
-    this.createLogWindow();
-    this.createStatusWindow();
-    this.createPartyCommandWindow();
-    this.createActorCommandWindow();
-    this.createHelpWindow();
-    this.createSkillWindow();
-    this.createItemWindow();
+    aliascreatewindows.call(this);
     this.createChangeWindow();
-    this.createActorWindow();
-    this.createEnemyWindow();
-    this.createMessageWindow();
-    this.createScrollTextWindow();
 };
 
 Scene_Battle.prototype.createChangeWindow = function() {
