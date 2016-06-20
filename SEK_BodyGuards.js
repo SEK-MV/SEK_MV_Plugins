@@ -22,7 +22,7 @@
 * @help 
 * 
 * To set the message to be shown when an actor defends, write in its notetags
-*  "<bodyg:Text to be shown>"
+*  "<bodyg:Text to be shown>" (without quotation marks)
 * Plugin Commands:
 *
 * bodyg on   Activates the plugin
