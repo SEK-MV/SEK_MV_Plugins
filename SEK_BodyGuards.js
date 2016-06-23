@@ -8,27 +8,27 @@
 *
 *
 *@param Actor to defend
-*@desc The Id of the actor that will be defended. Default is "1".
+*@desc The Id of the actor that will be defended. Default is 1.
 *@default 1
-*
-*@param Success Percentage
-*@desc Default is "40".
-*@default 40
 *
 *@param Enabled
 *@desc If true, the plugin will be enabled. Default is "true".
 *@default true
 *
 *@param Guard Chance
-*@desc If false, guard chance will be enabled (will still be true for hits that kill the actor). Default is "true".
+*@desc If false, guard chance will be disabled (the actor to defend will be protected from sure death anyhow). Default is "true".
 *@default true
 *
 *@param Block Chance
 *@desc If true, block chance will be enabled. Default is "true".
 *@default true
 *
+*@param Guard Chance Rate
+*@desc Guard Chance % Rate. Default is 40%.
+*@default 40
+*
 *@param Block Chance Rate
-*@desc Block Chance % Rate. Default is 30%
+*@desc Block Chance % Rate. Default is 30%.
 *@default 30
 *
 * @help 
@@ -59,7 +59,7 @@ var actor=Number(params['Actor to defend'] || 1);
 var enabled=(params['Enabled'] || "true").toLowerCase()==="true";
 var benabled=(params['Block Chance'] || "true").toLowerCase()==="true";
 var genabled=(params['Guard Chance'] || "true").toLowerCase()==="true";
-var perc=Number(params['Success Percentage'] || 40);
+var perc=Number(params['Guard Chance Rate'] || 40);
 var brate=Number(params['Block Chance Rate'] || 30);
 
 var intrptr = Game_Interpreter.prototype.pluginCommand;
