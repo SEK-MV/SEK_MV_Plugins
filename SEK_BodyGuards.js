@@ -263,6 +263,7 @@ Game_Action.prototype.apply = function(target) {
                     this.executeDamage(target, danno);
                 }
                 else
+                {
                 var testo=$dataActors[target.actorId()].meta.bodyg;
                 if (testo){
                 $gameMessage.setFaceImage(target._faceName,target._faceIndex);
@@ -270,6 +271,7 @@ Game_Action.prototype.apply = function(target) {
                 this.apply(target);
                 target.performDamage();
                 target.startDamagePopup();
+                }
                 if (target.hp<=0)
                 target.performCollapse();
             }
