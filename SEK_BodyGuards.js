@@ -249,8 +249,12 @@ Game_Action.prototype.apply = function(target) {
             danno=value;
             target=this.bodyGuard(target, danno);
             if (bg){
-                if (benabled&&brate>=Math.random()*100) 
+                if (benabled&&Math.random()*100<brate) 
                 {
+                    var testo=$dataActors[target.actorId()].meta.bodyg;
+                    if (testo){
+                        $gameMessage.setFaceImage(target._faceName,target._faceIndex);
+                        $gameMessage.add(testo);}
                     danno*=Math.random();
                     target=this.subject();
                     this.executeDamage(target, danno);
