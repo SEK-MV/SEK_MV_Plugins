@@ -8,8 +8,8 @@
 *
 *
 *@param Actor to defend
-*@desc The Id of the actor that will be defended. Default is "0".
-*@default 0
+*@desc The Id of the actor that will be defended. Default is "1".
+*@default 1
 *
 *@param Success Percentage
 *@desc Default is "40".
@@ -19,24 +19,48 @@
 *@desc If true, the plugin will be enabled. Default is "true".
 *@default true
 *
+*@param Guard Chance
+*@desc If false, guard chance will be enabled (will still be true for hits that kill the actor). Default is "true".
+*@default true
+*
+*@param Block Chance
+*@desc If true, block chance will be enabled. Default is "true".
+*@default true
+*
+*@param Block Chance Rate
+*@desc Block Chance % Rate. Default is 30%
+*@default 30
+*
 * @help 
-* 
+* Every actor has a percentage of success in defending the selected actor.
+* If the selected actor would die if hit, he will be protected for sure.
 * To set the message to be shown when an actor defends, write in its notetags
-*  "<bodyg:Text to be shown>" (without quotation marks)
+*  "<bodyg:Text to be shown>"  (without quotation marks)
 * Plugin Commands:
 *
-* bodyg on   Activates the plugin
-* bodyg off  Deactivates the plugin
+* bodyg on      Activates the plugin
+* bodyg off     Deactivates the plugin
+* 
+* bodyg gon     Activates Guard Chance
+* bodyg goff    Deactivates Guard Chance except for attacks that would kill
+*               the selected actor.
+* 
+* bodyg bon     Activates Block Chance
+* bodyg boff    Deactivates Block Chance
 * 
 * bodyg perc x      Success percentage becomes x (from 0 to 100).
 * bodyg actor x     Actor x will be defended
+* bodyg block x     Sets block chance to x%
 * 
 *You are free to use this plugin. If you do use it, I'd like to have my name and my plugin's name included in credits.
 */
 var params=PluginManager.parameters('SEK_BodyGuards');
-var actor=Number(params['Actor to defend'] || 0);
+var actor=Number(params['Actor to defend'] || 1);
 var enabled=(params['Enabled'] || "true").toLowerCase()==="true";
+var benabled=(params['Block Chance'] || "true").toLowerCase()==="true";
+var genabled=(params['Guard Chance'] || "true").toLowerCase()==="true";
 var perc=Number(params['Success Percentage'] || 40);
+var brate=Number(params['Block Chance Rate'] || 30);
 
 var intrptr = Game_Interpreter.prototype.pluginCommand;
 	Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -52,6 +76,22 @@ var intrptr = Game_Interpreter.prototype.pluginCommand;
 				{
 					enabled=false;
 				} break;
+				case 'bon':
+				{
+					benabled=true;
+				} break;				
+				case 'boff':
+				{
+					benabled=false;
+				} break;
+				case 'gon':
+				{
+					genabled=true;
+				} break;				
+				case 'goff':
+				{
+					genabled=false;
+				} break;
                                 case 'perc':
 				{
 					perc=args[1];
@@ -59,6 +99,10 @@ var intrptr = Game_Interpreter.prototype.pluginCommand;
 				case 'actor':
 				{
 					actors=args[1];
+                                    } break;
+                                case 'block':
+				{
+					brate=args[1];
                                     } break;
 			}
 		}
@@ -69,40 +113,62 @@ var danno;
 var bg=false;
 
 Game_Action.prototype.bodyGuard = function(target,value) {
-    if (target.isActor()&&enabled&&target.index()===actor)
+    if (target.isActor()&&enabled&&target.actorId()===actor)
     {
-        var shield;
-        var bg=false;
-        for (var i=0;i<$gameParty.members().length;i++)
-            {
-                if ($gameParty.members()[i].index()!==actor&&$gameParty.members()[i].hp!=0&&(!shield||$gameParty.members()[i].agi>shield.agi))
-                {
-                    shield=$gameParty.members()[i];
-                    bg=true;
-                }
-            }
-            if (bg&&(value>target.hp))
-            {
-                target=this.Defender($gameParty.members().clone(), shield);
-                if (!target) {
-                    var critical = (Math.random() < this.itemCri(shield));
-                    danno = this.makeDamageValue(shield, critical);
-                    target=shield;
-                }
-            }
-            else if (bg&&this.processDefend())
-            {
-                target=this.Defender($gameParty.members().clone(), shield);
-                if (!target) {
-                    var critical = (Math.random() < this.itemCri(shield));
-                    danno = this.makeDamageValue(shield, critical);
-                    target=shield;
-                }
-            }
-        
+        var shield=this.choseGuard();
+        shield? bg=true:bg=false;
+        if (bg&&(value>target.hp))
+        {
+            target=shield;
+        }
+        else if (bg&&genabled&&this.processDefend())
+        {
+            target=shield;
+        }
+        else bg=false;
+        return target
     }
+    bg=false;
     return target;
 };
+
+Game_Action.prototype.choseGuard = function ()
+{
+    // Select alive fighting members that can defend actor
+    var avaliableMembers=[];
+    for (var i=0;i<$gameParty.members().length;i++)
+    {
+        if ($gameParty.members()[i].actorId()!=actor&&$gameParty.members()[i].hp>0)
+        {
+            avaliableMembers.push($gameParty.members()[i]);
+        }
+    }
+    if (avaliableMembers.length==0) return null;
+    
+    // Obtain their defending percent
+    var membersPercent=this.setPercents(avaliableMembers);
+    
+    // Chose who should defend
+    var defenderIndex = this.defenderIndex(membersPercent);
+    
+    // Return the defender chosen or the one that will take his place if
+    // He would die.
+    var shield=avaliableMembers[defenderIndex];
+    var critical = (Math.random() < this.itemCri(shield));
+    var value = this.makeDamageValue(shield, critical);
+    avaliableMembers.splice(defenderIndex,1);
+    var ret=this.Defender(avaliableMembers, shield);
+    
+    if (ret==null) 
+    { 
+        danno=value;
+        return shield;
+    }
+    return ret;
+};
+
+
+
 
 Game_Action.prototype.Defender = function (membri, shield)
 {
@@ -110,28 +176,62 @@ Game_Action.prototype.Defender = function (membri, shield)
     var value = this.makeDamageValue(shield, critical);
     if (value>=shield.hp)
     {
-        var array=[];
-        for (var i=0;i<membri.length;i++)
-            if(membri[i].index()!=shield.index())
-                array.push(membri[i]);
-        membri=array;
+        // If this is the last defender and would die too, return null so
+        // The first chosen will defend and die.
         if (membri.length==0) return null;
-        shield=null;
-        for (var i=0;i<membri.length;i++)
-            {
-                if (membri[i].hp!=0&&(!shield||membri[i].agi>shield.agi))
-                {
-                    shield=membri[i];
-                }
-            }
-        if (shield)
-            return this.Defender(membri,shield);
+        // Else
+        // Obtain their defending percent
+        var membersPercent=this.setPercents(membri);
+
+        // Chose who should defend
+        var defenderIndex = this.defenderIndex(membersPercent);
+        
+        var ret=membri[defenderIndex];
+        // Return the defender chosen or the one that will take his place if
+        // He would die.
+        return this.Defender(membri.splice(defenderIndex,1), ret);
+        
     }
     bg=true;
     danno=value;
     return shield;     
 };
 
+
+
+Game_Action.prototype.defenderIndex = function (percents)
+{  
+    var i=0;
+    // Check wich is chosen:
+    while (true)
+    {
+        if (Math.random()*100 < percents[i])
+            return i;
+        i++;
+        if (i==percents.length) i=0;
+    }
+};
+
+Game_Action.prototype.setPercents = function (membri)
+{
+    var agitot=0;
+    var hptot=0;
+    var ret=[];
+    
+    // Calculate totals
+    for (var i=0;i<membri.length; i++)
+    {
+        agitot+=membri[i].agi;
+        hptot+=membri[i].hp;
+    }
+    
+    // Assign a percentage to each member
+    for (var i=0;i<membri.length; i++)
+    {
+        ret[i]=(membri[i].agi*100/agitot+membri[i].hp*100/hptot)/2;
+    }
+    return ret;
+};
 
 Game_Action.prototype.apply = function(target) {
     var result = target.result();
@@ -147,19 +247,29 @@ Game_Action.prototype.apply = function(target) {
             result.critical = (Math.random() < this.itemCri(target));
             var value = this.makeDamageValue(target, result.critical);
             danno=value;
-            bg=false;
-            target=this.bodyGuard(target, value);
+            target=this.bodyGuard(target, danno);
             if (bg){
+                if (benabled&&brate>=Math.random()*100) 
+                {
+                    danno*=Math.random();
+                    target=this.subject();
+                    this.executeDamage(target, danno);
+                    target.performDamage();
+                    target.startDamagePopup();
+                    this.executeDamage(target, danno);
+                }
+                else
                 var testo=$dataActors[target.actorId()].meta.bodyg;
-                console.log(testo);
                 if (testo){
                 $gameMessage.setFaceImage(target._faceName,target._faceIndex);
                 $gameMessage.add(testo);}
                 this.apply(target);
                 target.performDamage();
                 target.startDamagePopup();
+                if (target.hp<=0)
+                target.performCollapse();
             }
-            else
+            else 
             this.executeDamage(target, danno);
         }
         this.item().effects.forEach(function(effect) {
