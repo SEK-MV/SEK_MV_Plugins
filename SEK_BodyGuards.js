@@ -8,7 +8,7 @@
 *
 *
 *@param Actor to defend
-*@desc The Id of the actor that will be defended. Default is 1.
+*@desc The Id of the actor that will be defended. Default is "1".
 *@default 1
 *
 *@param Enabled
@@ -16,7 +16,7 @@
 *@default true
 *
 *@param Guard Chance
-*@desc If false, guard chance will be disabled (the actor to defend will be protected from sure death anyhow). Default is "true".
+*@desc If false, guard chance will be enabled (will still be true for hits that kill the actor). Default is "true".
 *@default true
 *
 *@param Block Chance
@@ -24,7 +24,7 @@
 *@default true
 *
 *@param Guard Chance Rate
-*@desc Guard Chance % Rate. Default is 40%.
+*@desc Determines how likely it is for the character to be protected from a non-lethal attack. Default is 40%.
 *@default 40
 *
 *@param Block Chance Rate
@@ -35,7 +35,9 @@
 * Every actor has a percentage of success in defending the selected actor.
 * If the selected actor would die if hit, he will be protected for sure.
 * To set the message to be shown when an actor defends, write in its notetags
-*  "<bodyg:Text to be shown>"  (without quotation marks)
+*  "<gbodyg:Text to be shown>"  (without quotation marks)
+* To set the message to be shown when an actor counterattacks, write in its notetags
+*  "<cbodyg:Text to be shown>"  (without quotation marks)
 * Plugin Commands:
 *
 * bodyg on      Activates the plugin
@@ -249,12 +251,12 @@ Game_Action.prototype.apply = function(target) {
             danno=value;
             target=this.bodyGuard(target, danno);
             if (bg){
-                if (benabled&&Math.random()*100<brate) 
+                if (benabled&&brate>=Math.random()*100) 
                 {
-                    var testo=$dataActors[target.actorId()].meta.bodyg;
-                    if (testo){
-                        $gameMessage.setFaceImage(target._faceName,target._faceIndex);
-                        $gameMessage.add(testo);}
+					var counterMsg=$dataActors[target.actorId()].meta.cbodyg;
+					if (counterMsg){
+					$gameMessage.setFaceImage(target._faceName,target._faceIndex);
+					$gameMessage.add(counterMsg);}
                     danno*=Math.random();
                     target=this.subject();
                     this.executeDamage(target, danno);
@@ -263,15 +265,13 @@ Game_Action.prototype.apply = function(target) {
                     this.executeDamage(target, danno);
                 }
                 else
-                {
-                var testo=$dataActors[target.actorId()].meta.bodyg;
+                var testo=$dataActors[target.actorId()].meta.gbodyg;
                 if (testo){
                 $gameMessage.setFaceImage(target._faceName,target._faceIndex);
                 $gameMessage.add(testo);}
                 this.apply(target);
                 target.performDamage();
                 target.startDamagePopup();
-                }
                 if (target.hp<=0)
                 target.performCollapse();
             }
