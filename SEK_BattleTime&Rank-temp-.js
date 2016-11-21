@@ -105,8 +105,14 @@ Scene_Battle.prototype.initialize = function() {
 }
 };
 
+Scene_Battle.prototype.terminate = function() {
+    Scene_Base.prototype.terminate.call(this);
+    $gameParty.onBattleEnd();
+    $gameTroop.onBattleEnd();
+    AudioManager.stopMe();
+	started=false;
+};
 BattleManager.makeRewards = function() {
- started=false;
 	d = new Date();
 	secs=(d.getTime()-tempo)/1000;
 	{x=ExpM[SecsM.length-1]; y=GoldM[SecsM.length-1]; rank=Ranks[SecsM.length-1];}
