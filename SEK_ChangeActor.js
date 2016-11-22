@@ -35,6 +35,9 @@
 * 
 * ac show x	Sets the animation to x
 *
+* ac lockon x	Lock actor x in battle, you won't be able to change it
+* ac lockoff x	Removes the lock on actor x
+*
 *You are free to use this plugin. If you do use it, I'd like to have my name and my plugin's name included in credits.
 */
 var params=PluginManager.parameters('SEK_ChangeActor');
