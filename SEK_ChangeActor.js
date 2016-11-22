@@ -1,5 +1,5 @@
 //=============================================================================
-// SEK_ChangeActor-temp-.js
+// SEK_ChangeActor.js
 //=============================================================================
 
 /*:
@@ -37,7 +37,7 @@
 *
 *You are free to use this plugin. If you do use it, I'd like to have my name and my plugin's name included in credits.
 */
-var params=PluginManager.parameters('SEK_ChangeActor-temp-');
+var params=PluginManager.parameters('SEK_ChangeActor');
 var cambio=String(params['Command Name']||"Change");
 var enabled=(params['Enabled'] || "true").toLowerCase()==="true";
 var show=(params['Show Animation on battler change'] || "true").toLowerCase()==="true";
