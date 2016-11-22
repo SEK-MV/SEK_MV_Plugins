@@ -1,5 +1,5 @@
 //=============================================================================
-// SEK_BattleTime&Rank-temp-.js
+// SEK_BattleTime&Rank.js
 //=============================================================================
 
 /*:
@@ -45,7 +45,7 @@
 * will get Rank D
 * By default, every multiplier is 1 and rank is "none"
 */
-var params=PluginManager.parameters('SEK_BattleTime&Rank-temp-');
+var params=PluginManager.parameters('SEK_BattleTime&Rank');
 	var Frase = String(params['End Battle Message'] || "Battle won in %s secs! - Rank %r");
 
 var aliasgamin = Game_Interpreter.prototype.pluginCommand;
