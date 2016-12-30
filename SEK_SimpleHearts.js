@@ -107,7 +107,7 @@ var aliasinterpreter = Game_Interpreter.prototype.pluginCommand;
 SceneManager.push = function(sceneClass) {
 	for (var i=51;i<100;i++)
 		$gameScreen.erasePicture(i);
-	a.call(this, sceneClass)
+	a.call(this, sceneClass);
 };
 	
 var wselalias=Window_Selectable.prototype.update;
