@@ -152,11 +152,11 @@ for (var i=1;i<$gameParty.members()[0].hp/unit+1;i++)
 		x-=34;
 		y+=48;
 	}
-	x=((x-1)/2-(x-1)/2%1)*48
+	x=((x-1)/2-(x-1)/2%1)*48;
 	if (im%2==1)
-		$gameScreen.showPicture(im, hh, 0, x, y, 100, 100, 255, 0)
+		$gameScreen.showPicture(im, hh, 0, x, y, 100, 100, 255, 0);
 	else
-		$gameScreen.showPicture(im, fh, 0, x, y, 100, 100, 255, 0)
+		$gameScreen.showPicture(im, fh, 0, x, y, 100, 100, 255, 0);
 }}
 for (var i=$gameParty.members()[0].hp/unit; i<$gameParty.members()[0].mhp/unit;i++)
 	$gameScreen.erasePicture(i+51);
