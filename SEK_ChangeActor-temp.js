@@ -269,7 +269,7 @@ Scene_Battle.prototype.onChangeOk = function() {
         windowChangeActive=false;
         this.select_next_patb_command();
     }
-    if (!usingpatb)
+    else
         this.jumpNextCommand();
     }
 };
@@ -315,7 +315,7 @@ Scene_Battle.prototype.c2 = function() {
 
 var _selectPreviousCommand = Scene_Battle.prototype.selectPreviousCommand;
 Scene_Battle.prototype.selectPreviousCommand = function() {
-    if(this._actorCommandWindow._actor)
+    if(!usingpatb&&this._actorCommandWindow._actor)
         if($gameParty.allMembers().indexOf(this._actorCommandWindow._actor)>0){
             newActor=$gameParty.allMembers()[$gameParty.allMembers().indexOf(this._actorCommandWindow._actor)-1];
             if (newActor._changedwith!=null)
