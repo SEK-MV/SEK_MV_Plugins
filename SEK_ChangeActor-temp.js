@@ -1,5 +1,5 @@
 //=============================================================================
-// SEK_ChangeActor.js
+// SEK_ChangeActor-temp.js
 //=============================================================================
 
 /*:
@@ -52,7 +52,7 @@
 *
 *You are free to use this plugin. If you do use it, I'd like to have my name and my plugin's name included in credits.
 */
-var params=PluginManager.parameters('SEK_ChangeActor');
+var params=PluginManager.parameters('SEK_ChangeActor-temp');
 var cambio=String(params['Command Name']||"Change");
 var enabled=(params['Enabled'] || "true").toLowerCase()==="true";
 var usingpatb=(params['Using DoubleX RMMV Popularized ATB Core'] || "true").toLowerCase()==="true";
